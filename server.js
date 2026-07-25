@@ -449,4 +449,6 @@ app.post('/api/theme', requireAuth, (req, res) => {
 
 app.use((req, res) => res.status(404).render('404'));
 
-app.listen(PORT, () => console.log(`Storysite running at http://localhost:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Storysite running on port ${PORT}`);
+});
