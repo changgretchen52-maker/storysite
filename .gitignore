@@ -5,3 +5,6 @@ storysite.db-wal
 storysite.db-shm
 uploads/*
 !uploads/.gitkeep
+.env
+storysite.db
+uploads/
