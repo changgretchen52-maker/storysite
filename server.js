@@ -4,8 +4,27 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypconst express = require('express');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
-const db = require('./db');
+const { Pool } = require('pg');
+
+const config = require('./config');
+const { requireAuth, attachUser } = require('./middleware/auth');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+const app = express();
+
 const config = require('./config');
 const { requireAuth, attachUser } = require('./middleware/auth');
 const crypto = require('crypto');                                                       const { Pool } = require('pg');
