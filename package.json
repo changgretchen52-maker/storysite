@@ -1,0 +1,17 @@
+{
+  "name": "storysite",
+  "version": "1.0.0",
+  "description": "A public site where anyone can sign up and post their story with a selfie",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "bcryptjs": "^2.4.3",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}

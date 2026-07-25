@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title><%= siteName %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <a href="/" class="brand-wrap">
+      <img src="/images/logo.png" alt="" class="site-logo" onerror="this.style.display='none'" />
+      <span class="brand"><i class="fas fa-star" style="color: #f1c40f;"></i> <%= siteName %></span>
+    </a>
+  </div>
+  
+  <!-- 汉堡菜单按钮（手机端显示） -->
+  <button class="menu-toggle" id="menuToggle" aria-label="菜单">
+    <span></span><span></span><span></span>
+  </button>
+  
+  <div class="nav-links" id="navLinks">
+    <% if (currentUser) { %>
+      <a href="/new">📝 写文章</a>
+      <a href="/gallery">📸 相册</a>
+      <a href="/explore">🌐 探索</a>
+      <a href="/messages">💬 私信</a>
+      <a href="/notifications">🔔 通知</a>
+      <a href="/user/<%= currentUser.username %>" class="nav-profile-link">
+        <% if (currentUser.avatar_filename) { %>
+          <img src="/uploads/<%= currentUser.avatar_filename %>" alt="" class="nav-avatar" />
+        <% } else { %>
+          <span class="nav-avatar nav-avatar-placeholder"><%= currentUser.username.charAt(0).toUpperCase() %></span>
+        <% } %>
+        我的
+      </a>
+      <form action="/logout" method="POST" class="inline-form">
+        <button type="submit" class="link-button">退出</button>
+      </form>
+    <% } else { %>
+      <a href="/login">登录</a>
+      <a href="/signup">注册</a>
+    <% } %>
+  </div>
+</nav>
+<main class="container">
+
+<style>
+/* ===== 导航栏 ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-left { display: flex; align-items: center; }
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.brand { font-size: 1.1rem; font-weight: 700; color: var(--accent-dark); }
+.site-logo { height: 28px; width: 28px; object-fit: contain; border-radius: 6px; }
+
+/* ===== 汉堡菜单 ===== */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2.5px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.menu-toggle.active span:nth-child(2) { opacity: 0; }
+.menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+.nav-links {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.nav-links a {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.nav-links a:hover { background: var(--bg); }
+.nav-profile-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+}
+.nav-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.nav-avatar-placeholder {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+.link-button {
+  background: none;
+  border: none;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.link-button:hover { background: var(--bg); border-radius: 6px; }
+.inline-form { display: inline; }
+
+/* ===== 手机端适配 ===== */
+@media (max-width: 768px) {
+  .menu-toggle { display: flex; }
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    padding: 12px 16px;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a,
+  .nav-links .inline-form,
+  .link-button {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+  .nav-links a:hover,
+  .link-button:hover { background: var(--bg); }
+  .brand { font-size: 1rem; }
+}
+
+/* ===== 容器 ===== */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 16px 60px;
+}
+
+/* ===== 通用手机优化 ===== */
+@media (max-width: 768px) {
+  /* 标题变小 */
+  h1 { font-size: 1.4rem !important; }
+  h2 { font-size: 1.1rem !important; }
+  
+  /* 卡片内边距减小 */
+  .post-card { border-radius: 12px; }
+  .post-content { padding: 14px 16px !important; }
+  .post-title { font-size: 1rem !important; }
+  .post-excerpt { font-size: 0.85rem !important; }
+  
+  /* 图文卡片堆叠 */
+  .post-card.has-image { flex-direction: column !important; }
+  .post-card.has-image .post-thumb-link { width: 100% !important; height: 200px !important; }
+  .post-card.has-image .post-content { width: 100% !important; padding: 14px 16px !important; }
+  
+  /* 分类导航换行 */
+  .category-nav { gap: 6px; }
+  .cat-link { font-size: 0.75rem; padding: 4px 12px; }
+  
+  /* 统计卡片 */
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+  .stat-card { padding: 12px; }
+  .stat-number { font-size: 1.4rem !important; }
+  
+  /* 用户网格 */
+  .users-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; }
+  
+  /* 相册网格 */
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; }
+  
+  /* 表单 */
+  .stacked-form input,
+  .stacked-form textarea { font-size: 0.95rem !important; padding: 10px 12px !important; }
+  
+  /* 按钮 */
+  .stacked-form button,
+  .save-btn { padding: 12px 16px !important; font-size: 0.95rem !important; }
+  
+  /* 评论区 */
+  .comment-form-detail { flex-direction: column; }
+  .comment-form-detail input { width: 100%; }
+  
+  /* 私信聊天 */
+  .chat-container { height: calc(100vh - 160px) !important; }
+  .chat-form { flex-direction: column; }
+  .chat-form input { width: 100%; }
+}
+</style>
+
+<script>
+// 汉堡菜单切换
+document.addEventListener('DOMContentLoaded', function() {
+  const toggle = document.getElementById('menuToggle');
+  const nav = document.getElementById('navLinks');
+  if (toggle && nav) {
+    toggle.addEventListener('click', function() {
+      this.classList.toggle('active');
+      nav.classList.toggle('open');
+    });
+    // 点击导航项后自动关闭菜单
+    nav.querySelectorAll('a, button').forEach(item => {
+      item.addEventListener('click', function() {
+        toggle.classList.remove('active');
+        nav.classList.remove('open');
+      });
+    });
+  }
+});
+</script>

@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+
+<h1>💬 私信</h1>
+
+<% if (friends.length === 0) { %>
+  <p style="color: #999; text-align: center; padding: 40px 0;">还没有好友，去添加一些吧！</p>
+<% } else { %>
+  <div class="messages-list">
+    <% friends.forEach(f => { %>
+      <a href="/messages/<%= f.id %>" class="message-item">
+        <% if (f.avatar_filename) { %>
+          <img src="/uploads/<%= f.avatar_filename %>" alt="" class="message-avatar" />
+        <% } else { %>
+          <span class="message-avatar-placeholder"><%= f.username.charAt(0).toUpperCase() %></span>
+        <% } %>
+        <div class="message-info">
+          <span class="message-username"><%= f.username %></span>
+          <span class="message-preview"><%= f.last_message || '开始聊天...' %></span>
+        </div>
+        <span class="message-time"><%= f.last_time ? new Date(f.last_time).toLocaleDateString() : '' %></span>
+      </a>
+    <% }) %>
+  </div>
+<% } %>
+
+<style>
+.messages-list { margin-top: 20px; }
+.message-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--border); text-decoration: none; color: var(--ink); transition: background 0.2s; }
+.message-item:hover { background: var(--bg); }
+.message-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+.message-avatar-placeholder { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent); color: white; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
+.message-info { flex: 1; }
+.message-username { font-weight: 600; display: block; }
+.message-preview { font-size: 0.85rem; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.message-time { font-size: 0.7rem; color: var(--muted); }
+</style>
+
+<%- include('partials/footer') %>

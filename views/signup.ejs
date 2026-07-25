@@ -1,0 +1,23 @@
+<%- include('partials/header') %>
+
+<div class="form-page">
+  <h1>Sign Up</h1>
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+  <form action="/signup" method="POST" class="stacked-form">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" required pattern="[a-zA-Z0-9_]{3,20}" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required minlength="8" />
+
+    <label for="confirmPassword">Confirm Password</label>
+    <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8" />
+
+    <button type="submit">Create Account</button>
+  </form>
+  <p>Already have an account? <a href="/login">Log in</a></p>
+</div>
+
+<%- include('partials/footer') %>

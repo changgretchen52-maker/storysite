@@ -1,0 +1,309 @@
+const express = require('express');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+
+const db = require('./db');
+const config = require('./config');
+const { requireAuth, attachUser } = require('./middleware/auth');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ---------- Config ----------
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
+
+const SESSION_SECRET = process.env.SESSION_SECRET || 'change-this-secret-in-production';
+
+// ---------- Middleware ----------
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(UPLOAD_DIR));
+
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      // secure: true, // enable this once you're serving over HTTPS
+    },
+  })
+);
+
+app.use(attachUser(db));
+
+app.use((req, res, next) => {
+  res.locals.siteName = config.siteName;
+  res.locals.tagline = config.tagline;
+  next();
+});
+
+// ---------- File upload (selfies) ----------
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+  filename: (req, file, cb) => {
+    const unique = crypto.randomBytes(8).toString('hex');
+    cb(null, `${Date.now()}-${unique}${path.extname(file.originalname).toLowerCase()}`);
+  },
+});
+
+function fileFilter(req, file, cb) {
+  const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.avi', '.mkv', '.m4v'];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowed.includes(ext)) cb(null, true);
+  else cb(new Error('Only image or video files are allowed'));
+}
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
+});
+
+// ---------- Routes: Feed ----------
+app.get('/', (req, res) => {
+  const posts = db
+    .prepare(
+      `SELECT posts.*, users.username, users.avatar_filename
+       FROM posts
+       JOIN users ON posts.user_id = users.id
+       ORDER BY posts.created_at DESC
+       LIMIT 50`
+    )
+    .all();
+  res.render('index', { posts });
+});
+
+// ---------- Routes: Auth ----------
+app.get('/signup', (req, res) => {
+  res.render('signup', { error: null });
+});
+
+app.post('/signup', async (req, res) => {
+  const { username, password, confirmPassword } = req.body;
+
+  if (!username || !password) {
+    return res.render('signup', { error: 'Username and password are required.' });
+  }
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+    return res.render('signup', {
+      error: 'Username must be 3-20 characters: letters, numbers, underscores only.',
+    });
+  }
+  if (password.length < 8) {
+    return res.render('signup', { error: 'Password must be at least 8 characters.' });
+  }
+  if (password !== confirmPassword) {
+    return res.render('signup', { error: 'Passwords do not match.' });
+  }
+
+  const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
+  if (existing) {
+    return res.render('signup', { error: 'That username is already taken.' });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const result = db
+    .prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)')
+    .run(username, passwordHash);
+
+  req.session.userId = result.lastInsertRowid;
+  res.redirect('/');
+});
+
+app.get('/login', (req, res) => {
+  res.render('login', { error: null });
+});
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+
+  if (!user) {
+    return res.render('login', { error: 'Invalid username or password.' });
+  }
+
+  const match = await bcrypt.compare(password, user.password_hash);
+  if (!match) {
+    return res.render('login', { error: 'Invalid username or password.' });
+  }
+
+  req.session.userId = user.id;
+  res.redirect('/');
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/'));
+});
+
+// ---------- Routes: New post ----------
+app.get('/new', requireAuth, (req, res) => {
+  res.render('new', { error: null });
+});
+
+app.post('/new', requireAuth, (req, res) => {
+  upload.single('photo')(req, res, (err) => {
+    if (err) {
+      return res.render('new', { error: err.message });
+    }
+
+    const { title, story } = req.body;
+    if (!title || !story) {
+      return res.render('new', { error: 'Title and story are required.' });
+    }
+
+    const photoFilename = req.file ? req.file.filename : null;
+
+    db.prepare(
+      'INSERT INTO posts (user_id, title, story, photo_filename) VALUES (?, ?, ?, ?)'
+    ).run(req.session.userId, title, story, photoFilename);
+
+    res.redirect('/');
+  });
+});
+
+// ---------- Routes: Edit own profile (avatar, bio) ----------
+app.get('/profile/edit', requireAuth, (req, res) => {
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+  res.render('profile-edit', { profileUser: user, error: null });
+});
+
+app.post('/profile/edit', requireAuth, (req, res) => {
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+
+  upload.single('avatar')(req, res, (err) => {
+    if (err) {
+      return res.render('profile-edit', { profileUser: user, error: err.message });
+    }
+
+    const { bio, removeAvatar } = req.body;
+    let avatarFilename = user.avatar_filename;
+
+    if (req.file) {
+      if (user.avatar_filename) {
+        fs.unlink(path.join(UPLOAD_DIR, user.avatar_filename), () => {});
+      }
+      avatarFilename = req.file.filename;
+    } else if (removeAvatar === 'on' && user.avatar_filename) {
+      fs.unlink(path.join(UPLOAD_DIR, user.avatar_filename), () => {});
+      avatarFilename = null;
+    }
+
+    db.prepare('UPDATE users SET bio = ?, avatar_filename = ? WHERE id = ?').run(
+      bio || '',
+      avatarFilename,
+      user.id
+    );
+
+    res.redirect('/user/' + user.username);
+  });
+});
+
+// ---------- Routes: Profile ----------
+app.get('/user/:username', (req, res) => {
+  const user = db
+    .prepare('SELECT id, username, bio, avatar_filename, created_at FROM users WHERE username = ?')
+    .get(req.params.username);
+
+  if (!user) return res.status(404).render('404');
+
+  const posts = db
+    .prepare('SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC')
+    .all(user.id);
+
+  res.render('profile', { profileUser: user, posts });
+});
+
+// ---------- Routes: Edit own post ----------
+app.get('/post/:id/edit', requireAuth, (req, res) => {
+  const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(req.params.id);
+  if (!post || post.user_id !== req.session.userId) {
+    return res.status(403).send('Not allowed');
+  }
+  res.render('edit', { post, error: null });
+});
+
+app.post('/post/:id/edit', requireAuth, (req, res) => {
+  const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(req.params.id);
+  if (!post || post.user_id !== req.session.userId) {
+    return res.status(403).send('Not allowed');
+  }
+
+  upload.single('photo')(req, res, (err) => {
+    if (err) {
+      return res.render('edit', { post, error: err.message });
+    }
+
+    const { title, story, removePhoto } = req.body;
+    if (!title || !story) {
+      return res.render('edit', { post, error: 'Title and story are required.' });
+    }
+
+    let photoFilename = post.photo_filename;
+
+    if (req.file) {
+      if (post.photo_filename) {
+        fs.unlink(path.join(UPLOAD_DIR, post.photo_filename), () => {});
+      }
+      photoFilename = req.file.filename;
+    } else if (removePhoto === 'on' && post.photo_filename) {
+      fs.unlink(path.join(UPLOAD_DIR, post.photo_filename), () => {});
+      photoFilename = null;
+    }
+
+    db.prepare('UPDATE posts SET title = ?, story = ?, photo_filename = ? WHERE id = ?').run(
+      title,
+      story,
+      photoFilename,
+      post.id
+    );
+
+    res.redirect('/user/' + res.locals.currentUser.username);
+  });
+});
+
+// ---------- Routes: Delete own post ----------
+app.post('/post/:id/delete', requireAuth, (req, res) => {
+  const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(req.params.id);
+  if (!post || post.user_id !== req.session.userId) {
+    return res.status(403).send('Not allowed');
+  }
+  if (post.photo_filename) {
+    const filePath = path.join(UPLOAD_DIR, post.photo_filename);
+    fs.unlink(filePath, () => {});
+  }
+  db.prepare('DELETE FROM posts WHERE id = ?').run(post.id);
+  res.redirect(req.headers.referer || '/');
+});
+
+// ---------- 404 ----------
+app.use((req, res) => {
+  res.status(404).render('404');
+});
+
+app.listen(PORT, () => {
+  console.log(`Storysite running at http://localhost:${PORT}`);
+});
+
+// ---------- Routes: Gallery ----------
+app.get('/gallery', (req, res) => {
+  const posts = db
+    .prepare(
+      `SELECT posts.*, users.username 
+       FROM posts 
+       JOIN users ON posts.user_id = users.id 
+       WHERE posts.photo_filename IS NOT NULL 
+       ORDER BY posts.created_at DESC`
+    )
+    .all();
+  res.render('gallery', { posts });
+});

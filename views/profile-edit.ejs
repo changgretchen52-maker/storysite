@@ -1,0 +1,98 @@
+<%- include('partials/header') %>
+
+<div class="edit-container">
+  <h1>📝 管理我的博客</h1>
+  <p class="subtitle">自定义你的个人主页风格</p>
+
+  <form action="/profile/edit" method="POST" enctype="multipart/form-data" class="edit-form">
+    
+    <div class="edit-section">
+      <h3>🎨 封面壁纸</h3>
+      <p class="help-text">上传一张图片作为你的个人主页封面（建议尺寸：1200x400）</p>
+      <% if (profileUser.cover_filename) { %>
+        <div class="current-cover">
+          <img src="/uploads/<%= profileUser.cover_filename %>" alt="当前封面" />
+          <label>
+            <input type="checkbox" name="removeCover" /> 删除当前封面
+          </label>
+        </div>
+      <% } %>
+      <input type="file" name="cover" accept="image/*" class="file-input" />
+    </div>
+
+    <div class="edit-section">
+      <h3>👤 头像</h3>
+      <p class="help-text">上传你的个人头像</p>
+      <% if (profileUser.avatar_filename) { %>
+        <div class="current-avatar">
+          <img src="/uploads/<%= profileUser.avatar_filename %>" alt="当前头像" class="avatar-preview" />
+          <label>
+            <input type="checkbox" name="removeAvatar" /> 删除当前头像
+          </label>
+        </div>
+      <% } %>
+      <input type="file" name="avatar" accept="image/*" class="file-input" />
+    </div>
+
+    <div class="edit-section">
+      <h3>📌 博客标题</h3>
+      <p class="help-text">显示在封面上的大标题</p>
+      <input type="text" name="blogTitle" value="<%= profileUser.blog_title || profileUser.username %>" placeholder="输入你的博客标题" class="text-input" />
+    </div>
+
+    <div class="edit-section">
+      <h3>📝 博客简介</h3>
+      <p class="help-text">显示在封面上的简短描述</p>
+      <textarea name="blogDescription" rows="3" placeholder="写一段关于你的博客的介绍..." class="text-input"><%= profileUser.blog_description || '' %></textarea>
+    </div>
+
+    <div class="edit-section">
+      <h3>💬 个人简介</h3>
+      <p class="help-text">显示在头像下方的自我介绍</p>
+      <textarea name="bio" rows="2" placeholder="介绍一下你自己..." class="text-input"><%= profileUser.bio || '' %></textarea>
+    </div>
+
+    <button type="submit" class="save-btn">💾 保存修改</button>
+    <a href="/user/<%= profileUser.username %>" class="cancel-btn">取消</a>
+  </form>
+</div>
+
+<style>
+.edit-container { max-width: 700px; margin: 0 auto; padding: 20px; }
+.edit-container h1 { font-size: 1.8rem; margin-bottom: 4px; }
+.subtitle { color: var(--muted); margin-bottom: 30px; }
+.edit-form { display: flex; flex-direction: column; gap: 28px; }
+.edit-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+.edit-section h3 { font-size: 1.1rem; margin: 0 0 4px; }
+.help-text { color: var(--muted); font-size: 0.85rem; margin: 0 0 14px; }
+.text-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-family: inherit; background: var(--bg); }
+.text-input:focus { border-color: var(--accent); outline: none; }
+.file-input { display: block; margin-top: 8px; }
+.current-cover { margin-bottom: 12px; }
+.current-cover img { max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border); object-fit: cover; }
+.current-avatar .avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); margin-bottom: 8px; }
+.current-cover label, .current-avatar label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--muted); cursor: pointer; }
+.save-btn { padding: 14px 32px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+.save-btn:hover { background: var(--accent-dark); }
+.cancel-btn { display: inline-block; margin-top: 12px; padding: 10px 24px; color: var(--muted); text-decoration: none; text-align: center; border: 1px solid var(--border); border-radius: 8px; }
+.cancel-btn:hover { background: var(--bg); }
+</style>
+
+<%- include('partials/footer') %>
+
+    <!-- 背景音乐上传 -->
+    <div class="edit-section">
+      <h3>🎵 背景音乐</h3>
+      <p class="help-text">上传你喜欢的音乐（MP3格式），别人访问你的主页时会播放</p>
+      <% if (profileUser.music_filename) { %>
+        <div class="current-music">
+          <audio controls style="width:100%; max-width:300px;">
+            <source src="/music/<%= profileUser.music_filename %>" type="audio/mpeg">
+          </audio>
+          <label>
+            <input type="checkbox" name="removeMusic" /> 删除当前音乐
+          </label>
+        </div>
+      <% } %>
+      <input type="file" name="music" accept="audio/mpeg" class="file-input" />
+    </div>

@@ -1,0 +1,44 @@
+<%- include('partials/header') %>
+
+<h1>🔔 通知</h1>
+
+<% if (notifications.length === 0) { %>
+  <p style="color: #999; text-align: center; padding: 40px 0;">暂无通知</p>
+<% } else { %>
+  <div class="notifications-list">
+    <% notifications.forEach(n => { %>
+      <div class="notification-item <%= n.is_read ? '' : 'unread' %>">
+        <a href="/user/<%= n.username %>">
+          <% if (n.avatar_filename) { %>
+            <img src="/uploads/<%= n.avatar_filename %>" alt="" class="notification-avatar" />
+          <% } else { %>
+            <span class="notification-avatar-placeholder"><%= n.username.charAt(0).toUpperCase() %></span>
+          <% } %>
+          <div class="notification-content">
+            <strong>@<%= n.username %></strong>
+            <% if (n.type === 'like') { %> 赞了你的帖子 <% } %>
+            <% if (n.type === 'comment') { %> 评论了你的帖子: "<%= n.post_title %>" <% } %>
+            <% if (n.type === 'friend_request') { %> 请求添加你为好友 <% } %>
+            <% if (n.type === 'message') { %> 给你发了私信 <% } %>
+            <span class="notification-time"><%= new Date(n.created_at).toLocaleString() %></span>
+          </div>
+        </a>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<style>
+.notifications-list { max-width: 700px; margin: 0 auto; }
+.notification-item { padding: 12px 16px; border-bottom: 1px solid var(--border); transition: background 0.2s; }
+.notification-item:hover { background: var(--bg); }
+.notification-item.unread { background: #f0f7ff; border-left: 3px solid var(--accent); }
+.notification-item a { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); }
+.notification-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.notification-avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent); color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+.notification-content { flex: 1; }
+.notification-content strong { color: var(--accent-dark); }
+.notification-time { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+</style>
+
+<%- include('partials/footer') %>

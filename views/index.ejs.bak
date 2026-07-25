@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+
+<h1>☀️ Latest Stories</h1>
+<% if (tagline) { %>
+  <p style="color: #ffffff; font-size: 1.2rem; margin-top: -4px; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.9);"><%= tagline %> 📮💌👩🏻‍🎓</p>
+<% } %>
+
+<% if (posts.length === 0) { %>
+  <p class="empty-state">No stories yet. Be the first to <a href="/signup">share yours</a>.</p>
+<% } %>
+
+<div class="post-grid">
+  <% posts.forEach(post => { %>
+    <article class="post-card">
+      <% if (post.photo_filename) { %>
+        <% const isVideo = post.photo_filename <img src="/uploads/<%= post.photo_filename %>" alt="Selfie posted by <%= post.username %>" class="post-photo" /><img src="/uploads/<%= post.photo_filename %>" alt="Selfie posted by <%= post.username %>" class="post-photo" /> (post.photo_filename.endsWith('.mp4') || post.photo_filename.endsWith('.mov') || post.photo_filename.endsWith('.avi') || post.photo_filename.endsWith('.mkv') || post.photo_filename.endsWith('.m4v')); if (isVideo) { %><video src="/uploads/<%= post.photo_filename %>" controls class="post-photo" playsinline></video><% } else { %><img src="/uploads/<%= post.photo_filename %>" alt="Posted by <%= post.username %>" class="post-photo" /><% } %>
+      <% } %>
+      <div class="post-body">
+        <h2><%= post.title %></h2>
+        <p class="post-story"><%= post.story %></p>
+        <div class="post-meta">
+          <a href="/user/<%= post.username %>" class="author-link">
+            <% if (post.avatar_filename) { %>
+              <img src="/uploads/<%= post.avatar_filename %>" alt="" class="mini-avatar" />
+            <% } else { %>
+              <span class="mini-avatar mini-avatar-placeholder"><%= post.username.charAt(0).toUpperCase() %></span>
+            <% } %>
+            @<%= post.username %>
+          </a>
+          &middot;
+          <span><%= new Date(post.created_at).toLocaleDateString() %></span>
+        </div>
+      </div>
+    </article>
+  <% }) %>
+</div>
+
+<%- include('partials/footer') %>

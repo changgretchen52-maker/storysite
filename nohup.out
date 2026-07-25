@@ -1,0 +1,39 @@
+
+> storysite@1.0.0 start
+> node server.js
+
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::3000
+    at Server.setupListenHandle [as _listen2] (node:net:1941:16)
+    at listenInCluster (node:net:1998:12)
+    at Server.listen (node:net:2103:7)
+    at Function.listen (/Users/gretchenchang/Downloads/storysite/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/Users/gretchenchang/Downloads/storysite/server.js:293:5)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Module._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1977:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 3000
+}
+
+Node.js v22.23.1
+your url is: https://yoonsun4u.loca.lt
+your url is: https://spotty-goat-96.loca.lt
+your url is: https://yoonsun4u.loca.lt
+your url is: https://curly-firefox-0.loca.lt
+your url is: https://yoonsun4u.loca.lt
+your url is: https://yoonsun4u.loca.lt
+your url is: https://wicked-moose-20.loca.lt
+your url is: https://witty-goat-52.loca.lt
+your url is: https://yoonsun4u.loca.lt

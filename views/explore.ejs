@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+
+<div class="explore-container">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number"><%= totalUsers || 0 %></div>
+      <div class="stat-label">👥 注册用户</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number"><%= totalPosts || 0 %></div>
+      <div class="stat-label">📝 总帖子数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number"><%= imagePosts ? imagePosts.length : 0 %></div>
+      <div class="stat-label">🖼️ 图文帖子</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number"><%= textPosts ? textPosts.length : 0 %></div>
+      <div class="stat-label">📄 纯文字帖子</div>
+    </div>
+  </div>
+
+  <div class="users-section">
+    <h2>👥 所有用户 (<%= totalUsers || 0 %>)</h2>
+    <div class="users-grid">
+      <% if (users && users.length > 0) { %>
+        <% users.forEach(user => { %>
+          <a href="/user/<%= user.username %>" class="user-card">
+            <% if (user.avatar_filename) { %>
+              <img src="/uploads/<%= user.avatar_filename %>" alt="<%= user.username %>" class="user-avatar" />
+            <% } else { %>
+              <div class="user-avatar placeholder"><%= user.username.charAt(0).toUpperCase() %></div>
+            <% } %>
+            <div class="user-info">
+              <div class="user-name"><%= user.username %></div>
+              <div class="user-bio"><%= user.bio || '✨' %></div>
+            </div>
+          </a>
+        <% }) %>
+      <% } else { %>
+        <p style="color: #999;">暂无用户</p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="posts-section">
+    <h2>🖼️ 图文帖子 (<%= imagePosts ? imagePosts.length : 0 %>)</h2>
+    <div class="post-grid">
+      <% if (imagePosts && imagePosts.length > 0) { %>
+        <% imagePosts.forEach(post => { %>
+          <a href="/post/<%= post.id %>" class="post-card-mini">
+            <img src="/uploads/<%= post.photo_filename %>" alt="<%= post.title %>" class="post-thumb" />
+            <div class="post-card-info">
+              <div class="post-card-title"><%= post.title %></div>
+              <div class="post-card-author">@<%= post.username %></div>
+            </div>
+          </a>
+        <% }) %>
+      <% } else { %>
+        <p style="color: #999;">暂无图文帖子</p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="posts-section">
+    <h2>📄 纯文字帖子 (<%= textPosts ? textPosts.length : 0 %>)</h2>
+    <div class="text-posts-list">
+      <% if (textPosts && textPosts.length > 0) { %>
+        <% textPosts.forEach(post => { %>
+          <a href="/post/<%= post.id %>" class="text-post-item">
+            <div class="text-post-title"><%= post.title %></div>
+            <div class="text-post-meta">
+              <span>@<%= post.username %></span>
+              <span><%= new Date(post.created_at).toLocaleDateString() %></span>
+            </div>
+          </a>
+        <% }) %>
+      <% } else { %>
+        <p style="color: #999;">暂无纯文字帖子</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+.explore-container { max-width: 1000px; margin: 0 auto; padding: 0 20px 40px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+.stat-card { background: var(--card-bg); border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.stat-number { font-size: 2rem; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+.users-section { margin-bottom: 40px; }
+.users-section h2 { font-size: 1.3rem; margin-bottom: 16px; }
+.users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.user-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card-bg); border-radius: 10px; text-decoration: none; color: var(--ink); transition: box-shadow 0.2s, transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.user-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.user-avatar.placeholder { display: flex; align-items: center; justify-content: center; background: var(--accent); color: white; font-weight: 700; font-size: 1.1rem; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-weight: 600; font-size: 0.9rem; }
+.user-bio { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.posts-section { margin-bottom: 40px; }
+.posts-section h2 { font-size: 1.3rem; margin-bottom: 16px; }
+.post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.post-card-mini { background: var(--card-bg); border-radius: 10px; overflow: hidden; text-decoration: none; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.04); transition: box-shadow 0.2s, transform 0.2s; }
+.post-card-mini:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-3px); }
+.post-thumb { width: 100%; height: 150px; object-fit: cover; }
+.post-card-info { padding: 10px 12px; }
+.post-card-title { font-weight: 600; font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.post-card-author { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.text-posts-list { display: flex; flex-direction: column; gap: 8px; }
+.text-post-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--card-bg); border-radius: 8px; text-decoration: none; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.04); transition: background 0.2s; }
+.text-post-item:hover { background: var(--bg); }
+.text-post-title { font-weight: 500; font-size: 0.95rem; }
+.text-post-meta { font-size: 0.75rem; color: var(--muted); display: flex; gap: 12px; }
+@media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .users-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } .post-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+</style>
+
+<%- include('partials/footer') %>

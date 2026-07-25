@@ -1,0 +1,48 @@
+<%- include('partials/header') %>
+
+<div class="form-page">
+  <h1>✍️ 写文章</h1>
+  <p class="subtitle">分享你的故事、想法或见解</p>
+  
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+  
+  <form action="/new" method="POST" enctype="multipart/form-data" class="stacked-form">
+    <label for="title">📌 标题</label>
+    <input type="text" id="title" name="title" required maxlength="120" placeholder="给文章起个吸引人的标题..." />
+    
+    <label for="excerpt">📝 摘要（可选）</label>
+    <input type="text" id="excerpt" name="excerpt" maxlength="200" placeholder="一句话概括你的文章..." />
+    
+    <label for="story">📖 正文</label>
+    <textarea id="story" name="story" rows="15" required placeholder="写下你的故事...&#10;&#10;支持 Markdown 格式：&#10;# 标题&#10;**粗体**&#10;*斜体*&#10;- 列表项"></textarea>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="photo">🖼️ 封面图片（可选）</label>
+        <input type="file" id="photo" name="photo" accept="image/png, image/jpeg, image/gif, image/webp, video/mp4, video/quicktime, video/avi, video/mov" />
+        <p class="help-text">建议尺寸：1200 x 630px</p>
+      </div>
+    </div>
+    
+    <button type="submit">🚀 发布文章</button>
+  </form>
+</div>
+
+<style>
+.form-page { max-width: 720px; margin: 0 auto; padding: 20px; }
+.form-page h1 { font-size: 1.8rem; margin-bottom: 4px; }
+.subtitle { color: var(--muted); margin-bottom: 30px; }
+.stacked-form { display: flex; flex-direction: column; gap: 6px; }
+.stacked-form label { font-weight: 600; margin-top: 16px; font-size: 0.9rem; }
+.stacked-form input, .stacked-form textarea { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-family: inherit; background: var(--card-bg); color: var(--ink); transition: border 0.3s; }
+.stacked-form input:focus, .stacked-form textarea:focus { border-color: var(--accent); outline: none; }
+.stacked-form textarea { resize: vertical; min-height: 300px; line-height: 1.8; }
+.form-row { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 8px; }
+.help-text { font-size: 0.75rem; color: var(--muted); margin: 4px 0 0; }
+.stacked-form button { margin-top: 20px; padding: 14px 18px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+.stacked-form button:hover { background: var(--accent-dark); }
+</style>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+
+<div class="profile-cover" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div class="cover-overlay"></div>
+  <div class="cover-content">
+    <div class="profile-avatar-wrapper">
+      <% if (profileUser.avatar_filename) { %>
+        <img src="/uploads/<%= profileUser.avatar_filename %>" alt="<%= profileUser.username %>" class="profile-avatar-large" />
+      <% } else { %>
+        <div class="profile-avatar-large placeholder"><%= profileUser.username.charAt(0).toUpperCase() %></div>
+      <% } %>
+    </div>
+    <h1 class="profile-name"><%= profileUser.blog_title || profileUser.username %></h1>
+    <p class="profile-bio-text"><%= profileUser.bio || '✨ 欢迎来到我的故事空间' %></p>
+    <p class="profile-username">@<%= profileUser.username %></p>
+    <% if (profileUser.blog_description) { %>
+      <p class="profile-desc"><%= profileUser.blog_description %></p>
+    <% } %>
+    <div class="profile-stats">
+      <span>📝 <%= posts.length %> 个故事</span>
+      <span>📅 加入于 <%= new Date(profileUser.created_at).toLocaleDateString() %></span>
+    </div>
+    
+    <!-- 好友和私信按钮 -->
+    <% if (currentUser && !isOwnProfile) { %>
+      <div class="profile-actions">
+        <% if (friendStatus === 'pending') { %>
+          <span class="friend-status">⏳ 好友请求已发送</span>
+        <% } else if (friendStatus === 'accepted') { %>
+          <a href="/messages/<%= profileUser.id %>" class="friend-btn">💬 发私信</a>
+        <% } else { %>
+          <form action="/friend/<%= profileUser.id %>/request" method="POST" style="display:inline;">
+            <button type="submit" class="friend-btn">➕ 添加好友</button>
+          </form>
+        <% } %>
+      </div>
+    <% } %>
+    
+    <% if (currentUser && isOwnProfile) { %>
+      <a href="/profile/edit" class="edit-profile-btn">✏️ 管理我的博客</a>
+    <% } %>
+  </div>
+</div>
+
+<div class="profile-posts">
+  <h2>📖 最新故事</h2>
+  <% if (posts.length === 0) { %>
+    <p class="empty-state">还没有故事，开始写第一个吧！</p>
+  <% } else { %>
+    <div class="post-grid">
+      <% posts.forEach(post => { %>
+        <article class="post-card">
+          <% if (post.photo_filename) { %>
+            <% const isVideo = post.photo_filename && (post.photo_filename.endsWith('.mp4') || post.photo_filename.endsWith('.mov') || post.photo_filename.endsWith('.avi') || post.photo_filename.endsWith('.mkv') || post.photo_filename.endsWith('.m4v')); %>
+            <% if (isVideo) { %>
+              <video src="/uploads/<%= post.photo_filename %>" controls class="post-photo" playsinline></video>
+            <% } else { %>
+              <img src="/uploads/<%= post.photo_filename %>" alt="<%= post.title %>" class="post-photo" />
+            <% } %>
+          <% } %>
+          <div class="post-body">
+            <a href="/post/<%= post.id %>" style="text-decoration: none; color: inherit;">
+              <h2><%= post.title %></h2>
+            </a>
+            <p class="post-story"><%= post.story %></p>
+            <div class="post-meta">
+              <span><%= new Date(post.created_at).toLocaleDateString() %></span>
+            </div>
+            <% if (currentUser && isOwnProfile) { %>
+              <div class="post-actions-edit">
+                <a href="/post/<%= post.id %>/edit" class="edit-link">✏️ 编辑</a>
+                <form action="/post/<%= post.id %>/delete" method="POST" style="display:inline;" onsubmit="return confirm('确定要删除吗？');">
+                  <button type="submit" class="delete-link">🗑️ 删除</button>
+                </form>
+              </div>
+            <% } %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<style>
+.profile-cover { position: relative; width: 100%; height: 340px; background-size: cover; background-position: center; border-radius: 0 0 24px 24px; overflow: hidden; margin-bottom: 30px; }
+.cover-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%); }
+.cover-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 0 20px; }
+.profile-avatar-wrapper { margin-bottom: 12px; }
+.profile-avatar-large { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.profile-avatar-large.placeholder { display: flex; align-items: center; justify-content: center; background: var(--accent); color: white; font-size: 2.5rem; font-weight: 700; }
+.profile-name { font-size: 2rem; font-weight: 700; margin: 4px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.profile-bio-text { font-size: 1rem; opacity: 0.9; margin: 4px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+.profile-username { font-size: 0.9rem; opacity: 0.7; margin: 2px 0; }
+.profile-desc { font-size: 0.95rem; opacity: 0.8; margin: 6px 0 10px; max-width: 500px; }
+.profile-stats { display: flex; gap: 24px; font-size: 0.85rem; opacity: 0.8; margin: 6px 0 12px; }
+.profile-actions { display: flex; gap: 12px; margin: 8px 0; }
+.friend-btn { display: inline-block; padding: 8px 24px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s; cursor: pointer; }
+.friend-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+.friend-status { padding: 8px 24px; background: rgba(255,255,255,0.1); border-radius: 20px; font-size: 0.9rem; }
+.edit-profile-btn { display: inline-block; padding: 8px 24px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s; }
+.edit-profile-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+.profile-posts { max-width: 900px; margin: 0 auto; padding: 0 20px 40px; }
+.profile-posts h2 { font-size: 1.5rem; margin-bottom: 20px; }
+.post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.post-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.3s, box-shadow 0.3s; }
+.post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+.post-photo { width: 100%; height: 200px; object-fit: cover; }
+.post-body { padding: 16px; }
+.post-body h2 { font-size: 1.05rem; margin: 0 0 6px; }
+.post-story { color: var(--muted); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
+.post-meta { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+.post-actions-edit { margin-top: 10px; display: flex; gap: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+.edit-link { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.delete-link { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; }
+.delete-link:hover { text-decoration: underline; }
+</style>
+
+<%- include('partials/footer') %>

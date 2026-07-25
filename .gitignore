@@ -1,0 +1,7 @@
+node_modules/
+storysite.db
+storysite.db-journal
+storysite.db-wal
+storysite.db-shm
+uploads/*
+!uploads/.gitkeep
