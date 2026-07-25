@@ -1,11 +1,10 @@
-const { Pool } = require('pg');
+const Database = require('better-sqlite3');
+const path = require('path');
 
-const pool = new Pool({
-  connectionString: 'postgresql://postgres:JUCnatOIHEpsXNaBAJysQjxeWjKsKxvW@sakura.proxy.rlwy.net:19230/railway',
-  ssl: { rejectUnauthorized: false }
-});
+const db = new Database(
+  path.join(__dirname, 'storysite.db')
+);
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-  getClient: () => pool.connect()
-};
+module.exports = db;
+
+
