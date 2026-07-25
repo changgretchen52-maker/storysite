@@ -5,10 +5,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-
 const db = require('./db');
 const config = require('./config');
 const { requireAuth, attachUser } = require('./middleware/auth');
+const crypto = require('crypto');                                                       const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
