@@ -5,7 +5,7 @@
     <div class="post-detail-header">
       <a href="/user/<%= post.username %>" class="post-detail-author">
         <% if (post.avatar_filename) { %>
-          <img src="/uploads/<%= post.avatar_filename %>" alt="" class="detail-avatar" />
+          <img src="<%= post.avatar_filename %>" alt="" class="detail-avatar" />
         <% } else { %>
           <span class="detail-avatar-placeholder"><%= post.username.charAt(0).toUpperCase() %></span>
         <% } %>
@@ -20,9 +20,9 @@
     <% if (post.photo_filename) { %>
       <% const isVideo = post.photo_filename && (post.photo_filename.endsWith('.mp4') || post.photo_filename.endsWith('.mov') || post.photo_filename.endsWith('.avi') || post.photo_filename.endsWith('.mkv') || post.photo_filename.endsWith('.m4v')); %>
       <% if (isVideo) { %>
-        <video src="/uploads/<%= post.photo_filename %>" controls class="detail-media" playsinline></video>
+        <video src="<%= post.photo_filename %>" controls class="detail-media" playsinline></video>
       <% } else { %>
-        <img src="/uploads/<%= post.photo_filename %>" alt="<%= post.title %>" class="detail-media" />
+        <img src="<%= post.photo_filename %>" alt="<%= post.title %>" class="detail-media" />
       <% } %>
     <% } %>
 
@@ -64,7 +64,7 @@
           <div class="comment-header">
             <a href="/user/<%= comment.username %>" class="comment-author">
               <% if (comment.avatar_filename) { %>
-                <img src="/uploads/<%= comment.avatar_filename %>" alt="" class="comment-avatar" />
+                <img src="<%= comment.avatar_filename %>" alt="" class="comment-avatar" />
               <% } else { %>
                 <span class="comment-avatar-placeholder"><%= comment.username.charAt(0).toUpperCase() %></span>
               <% } %>
@@ -95,7 +95,7 @@
                   <div class="comment-header">
                     <a href="/user/<%= reply.username %>" class="comment-author">
                       <% if (reply.avatar_filename) { %>
-                        <img src="/uploads/<%= reply.avatar_filename %>" alt="" class="comment-avatar" />
+                        <img src="<%= reply.avatar_filename %>" alt="" class="comment-avatar" />
                       <% } else { %>
                         <span class="comment-avatar-placeholder"><%= reply.username.charAt(0).toUpperCase() %></span>
                       <% } %>

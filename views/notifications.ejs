@@ -10,7 +10,7 @@
       <div class="notification-item <%= n.is_read ? '' : 'unread' %>">
         <a href="/user/<%= n.username %>">
           <% if (n.avatar_filename) { %>
-            <img src="/uploads/<%= n.avatar_filename %>" alt="" class="notification-avatar" />
+            <img src="<%= n.avatar_filename %>" alt="" class="notification-avatar" />
           <% } else { %>
             <span class="notification-avatar-placeholder"><%= n.username.charAt(0).toUpperCase() %></span>
           <% } %>

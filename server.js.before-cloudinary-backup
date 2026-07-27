@@ -6,18 +6,9 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
 const db = require('./db');
 const config = require('./config');
 const { requireAuth, attachUser } = require('./middleware/auth');
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -50,12 +41,11 @@ app.use((req, res, next) => {
   next();
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'storysite',
-    resource_type: 'auto',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mkv', 'm4v']
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+  filename: (req, file, cb) => {
+    const unique = crypto.randomBytes(8).toString('hex');
+    cb(null, `${Date.now()}-${unique}${path.extname(file.originalname).toLowerCase()}`);
   }
 });
 
@@ -134,7 +124,7 @@ app.post('/new', requireAuth, (req, res) => {
     try {
       const { title, story } = req.body;
       if (!title || !story) return res.render('new', { error: 'Title and story are required.' });
-      const photoFilename = req.file ? req.file.path : null;
+      const photoFilename = req.file ? req.file.filename : null;
       await db.query(
         'INSERT INTO posts (user_id, title, story, photo_filename) VALUES ($1, $2, $3, $4)',
         [req.session.userId, title, story, photoFilename]
@@ -394,14 +384,14 @@ app.post('/profile/edit', requireAuth, (req, res) => {
       let coverFilename = user.cover_filename;
       if (req.files && req.files['avatar']) {
         if (user.avatar_filename) fs.unlink(path.join(UPLOAD_DIR, user.avatar_filename), () => {});
-        avatarFilename = req.files['avatar'][0].path;
+        avatarFilename = req.files['avatar'][0].filename;
       } else if (removeAvatar === 'on' && user.avatar_filename) {
         fs.unlink(path.join(UPLOAD_DIR, user.avatar_filename), () => {});
         avatarFilename = null;
       }
       if (req.files && req.files['cover']) {
         if (user.cover_filename) fs.unlink(path.join(UPLOAD_DIR, user.cover_filename), () => {});
-        coverFilename = req.files['cover'][0].path;
+        coverFilename = req.files['cover'][0].filename;
       } else if (removeCover === 'on' && user.cover_filename) {
         fs.unlink(path.join(UPLOAD_DIR, user.cover_filename), () => {});
         coverFilename = null;
@@ -540,7 +530,7 @@ app.post('/post/:id/edit', requireAuth, async (req, res) => {
         let photoFilename = post.photo_filename;
         if (req.file) {
           if (post.photo_filename) fs.unlink(path.join(UPLOAD_DIR, post.photo_filename), () => {});
-          photoFilename = req.file.path;
+          photoFilename = req.file.filename;
         } else if (removePhoto === 'on' && post.photo_filename) {
           fs.unlink(path.join(UPLOAD_DIR, post.photo_filename), () => {});
           photoFilename = null;

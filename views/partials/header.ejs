@@ -31,7 +31,7 @@
       <a href="/notifications">🔔 通知</a>
       <a href="/user/<%= currentUser.username %>" class="nav-profile-link">
         <% if (currentUser.avatar_filename) { %>
-          <img src="/uploads/<%= currentUser.avatar_filename %>" alt="" class="nav-avatar" />
+          <img src="<%= currentUser.avatar_filename %>" alt="" class="nav-avatar" />
         <% } else { %>
           <span class="nav-avatar nav-avatar-placeholder"><%= currentUser.username.charAt(0).toUpperCase() %></span>
         <% } %>

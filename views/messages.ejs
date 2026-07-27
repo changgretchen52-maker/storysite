@@ -9,7 +9,7 @@
     <% friends.forEach(f => { %>
       <a href="/messages/<%= f.id %>" class="message-item">
         <% if (f.avatar_filename) { %>
-          <img src="/uploads/<%= f.avatar_filename %>" alt="" class="message-avatar" />
+          <img src="<%= f.avatar_filename %>" alt="" class="message-avatar" />
         <% } else { %>
           <span class="message-avatar-placeholder"><%= f.username.charAt(0).toUpperCase() %></span>
         <% } %>

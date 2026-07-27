@@ -14,7 +14,7 @@
 
     <% if (post.photo_filename) { %>
       <p>Current photo:</p>
-      <img src="/uploads/<%= post.photo_filename %>" alt="Current selfie" class="current-photo" />
+      <img src="<%= post.photo_filename %>" alt="Current selfie" class="current-photo" />
       <label class="checkbox-label">
         <input type="checkbox" name="removePhoto" />
         Remove this photo

@@ -27,7 +27,7 @@
         <% users.forEach(user => { %>
           <a href="/user/<%= user.username %>" class="user-card">
             <% if (user.avatar_filename) { %>
-              <img src="/uploads/<%= user.avatar_filename %>" alt="<%= user.username %>" class="user-avatar" />
+              <img src="<%= user.avatar_filename %>" alt="<%= user.username %>" class="user-avatar" />
             <% } else { %>
               <div class="user-avatar placeholder"><%= user.username.charAt(0).toUpperCase() %></div>
             <% } %>
@@ -49,7 +49,7 @@
       <% if (imagePosts && imagePosts.length > 0) { %>
         <% imagePosts.forEach(post => { %>
           <a href="/post/<%= post.id %>" class="post-card-mini">
-            <img src="/uploads/<%= post.photo_filename %>" alt="<%= post.title %>" class="post-thumb" />
+            <img src="<%= post.photo_filename %>" alt="<%= post.title %>" class="post-thumb" />
             <div class="post-card-info">
               <div class="post-card-title"><%= post.title %></div>
               <div class="post-card-author">@<%= post.username %></div>

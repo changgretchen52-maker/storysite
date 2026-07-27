@@ -11,7 +11,7 @@
       <p class="help-text">上传一张图片作为你的个人主页封面（建议尺寸：1200x400）</p>
       <% if (profileUser.cover_filename) { %>
         <div class="current-cover">
-          <img src="/uploads/<%= profileUser.cover_filename %>" alt="当前封面" />
+          <img src="<%= profileUser.cover_filename %>" alt="当前封面" />
           <label>
             <input type="checkbox" name="removeCover" /> 删除当前封面
           </label>
@@ -25,7 +25,7 @@
       <p class="help-text">上传你的个人头像</p>
       <% if (profileUser.avatar_filename) { %>
         <div class="current-avatar">
-          <img src="/uploads/<%= profileUser.avatar_filename %>" alt="当前头像" class="avatar-preview" />
+          <img src="<%= profileUser.avatar_filename %>" alt="当前头像" class="avatar-preview" />
           <label>
             <input type="checkbox" name="removeAvatar" /> 删除当前头像
           </label>

@@ -10,7 +10,7 @@
     <% posts.forEach(post => { %>
       <div class="gallery-item">
         <a href="/user/<%= post.username %>">
-          <img src="/uploads/<%= post.photo_filename %>" alt="<%= post.title %>" loading="lazy" />
+          <img src="<%= post.photo_filename %>" alt="<%= post.title %>" loading="lazy" />
           <div class="gallery-overlay">
             <span><%= post.title %></span>
             <small>@<%= post.username %></small>

@@ -26,9 +26,9 @@
       <% if (hasImage) { %>
         <a href="/post/<%= post.id %>" class="post-thumb-link">
           <% if (isVideo) { %>
-            <video src="/uploads/<%= post.photo_filename %>" class="post-thumb" muted></video>
+            <video src="<%= post.photo_filename %>" class="post-thumb" muted></video>
           <% } else { %>
-            <img src="/uploads/<%= post.photo_filename %>" alt="<%= post.title %>" class="post-thumb" loading="lazy" />
+            <img src="<%= post.photo_filename %>" alt="<%= post.title %>" class="post-thumb" loading="lazy" />
           <% } %>
           <% if (post.read_time > 1) { %>
             <span class="read-time-badge">📖 <%= post.read_time %> min</span>
@@ -40,7 +40,7 @@
         <div class="post-meta-top">
           <a href="/user/<%= post.username %>" class="post-author">
             <% if (post.avatar_filename) { %>
-              <img src="/uploads/<%= post.avatar_filename %>" alt="" class="post-author-avatar" />
+              <img src="<%= post.avatar_filename %>" alt="" class="post-author-avatar" />
             <% } else { %>
               <span class="post-author-avatar placeholder"><%= post.username.charAt(0).toUpperCase() %></span>
             <% } %>

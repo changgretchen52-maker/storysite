@@ -5,7 +5,7 @@
   <div class="cover-content">
     <div class="profile-avatar-wrapper">
       <% if (profileUser.avatar_filename) { %>
-        <img src="/uploads/<%= profileUser.avatar_filename %>" alt="<%= profileUser.username %>" class="profile-avatar-large" />
+        <img src="<%= profileUser.avatar_filename %>" alt="<%= profileUser.username %>" class="profile-avatar-large" />
       <% } else { %>
         <div class="profile-avatar-large placeholder"><%= profileUser.username.charAt(0).toUpperCase() %></div>
       <% } %>
@@ -53,9 +53,9 @@
           <% if (post.photo_filename) { %>
             <% const isVideo = post.photo_filename && (post.photo_filename.endsWith('.mp4') || post.photo_filename.endsWith('.mov') || post.photo_filename.endsWith('.avi') || post.photo_filename.endsWith('.mkv') || post.photo_filename.endsWith('.m4v')); %>
             <% if (isVideo) { %>
-              <video src="/uploads/<%= post.photo_filename %>" controls class="post-photo" playsinline></video>
+              <video src="<%= post.photo_filename %>" controls class="post-photo" playsinline></video>
             <% } else { %>
-              <img src="/uploads/<%= post.photo_filename %>" alt="<%= post.title %>" class="post-photo" />
+              <img src="<%= post.photo_filename %>" alt="<%= post.title %>" class="post-photo" />
             <% } %>
           <% } %>
           <div class="post-body">

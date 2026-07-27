@@ -13,7 +13,7 @@
   <% posts.forEach(post => { %>
     <article class="post-card">
       <% if (post.photo_filename) { %>
-        <% const isVideo = post.photo_filename <img src="/uploads/<%= post.photo_filename %>" alt="Selfie posted by <%= post.username %>" class="post-photo" /><img src="/uploads/<%= post.photo_filename %>" alt="Selfie posted by <%= post.username %>" class="post-photo" /> (post.photo_filename.endsWith('.mp4') || post.photo_filename.endsWith('.mov') || post.photo_filename.endsWith('.avi') || post.photo_filename.endsWith('.mkv') || post.photo_filename.endsWith('.m4v')); if (isVideo) { %><video src="/uploads/<%= post.photo_filename %>" controls class="post-photo" playsinline></video><% } else { %><img src="/uploads/<%= post.photo_filename %>" alt="Posted by <%= post.username %>" class="post-photo" /><% } %>
+        <% const isVideo = post.photo_filename <img src="<%= post.photo_filename %>" alt="Selfie posted by <%= post.username %>" class="post-photo" /><img src="<%= post.photo_filename %>" alt="Selfie posted by <%= post.username %>" class="post-photo" /> (post.photo_filename.endsWith('.mp4') || post.photo_filename.endsWith('.mov') || post.photo_filename.endsWith('.avi') || post.photo_filename.endsWith('.mkv') || post.photo_filename.endsWith('.m4v')); if (isVideo) { %><video src="<%= post.photo_filename %>" controls class="post-photo" playsinline></video><% } else { %><img src="<%= post.photo_filename %>" alt="Posted by <%= post.username %>" class="post-photo" /><% } %>
       <% } %>
       <div class="post-body">
         <h2><%= post.title %></h2>
@@ -21,7 +21,7 @@
         <div class="post-meta">
           <a href="/user/<%= post.username %>" class="author-link">
             <% if (post.avatar_filename) { %>
-              <img src="/uploads/<%= post.avatar_filename %>" alt="" class="mini-avatar" />
+              <img src="<%= post.avatar_filename %>" alt="" class="mini-avatar" />
             <% } else { %>
               <span class="mini-avatar mini-avatar-placeholder"><%= post.username.charAt(0).toUpperCase() %></span>
             <% } %>
