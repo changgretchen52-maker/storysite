@@ -1,0 +1,171 @@
+<%- include('partials/header') %>
+
+<div class="post-detail">
+  <div class="post-detail-card">
+    <div class="post-detail-header">
+      <a href="/user/<%= post.username %>" class="post-detail-author">
+        <% if (post.avatar_filename) { %>
+          <img src="<%= post.avatar_filename %>" alt="" class="detail-avatar" />
+        <% } else { %>
+          <span class="detail-avatar-placeholder"><%= post.username.charAt(0).toUpperCase() %></span>
+        <% } %>
+        <span><%= post.username %></span>
+      </a>
+      <span class="post-detail-date"><%= new Date(post.created_at).toLocaleString() %></span>
+    </div>
+
+    <h1 class="post-detail-title"><%= post.title %></h1>
+    <p class="post-detail-story"><%= post.story %></p>
+
+    <% if (post.photo_filename) { %>
+      <% const isVideo = post.photo_filename && (post.photo_filename.endsWith('.mp4') || post.photo_filename.endsWith('.mov') || post.photo_filename.endsWith('.avi') || post.photo_filename.endsWith('.mkv') || post.photo_filename.endsWith('.m4v')); %>
+      <% if (isVideo) { %>
+        <video src="<%= post.photo_filename %>" controls class="detail-media" playsinline></video>
+      <% } else { %>
+        <img src="<%= post.photo_filename %>" alt="<%= post.title %>" class="detail-media" />
+      <% } %>
+    <% } %>
+
+    <div class="post-detail-actions">
+      <form action="/post/<%= post.id %>/like" method="POST" style="display:inline;">
+        <button type="submit" class="like-btn <%= userLiked ? 'liked' : '' %>">
+          <%= userLiked ? '❤️' : '🤍' %> <span><%= likeCount || 0 %></span>
+        </button>
+      </form>
+      <span>💬 <%= commentCount || 0 %></span>
+      <% if (currentUser && currentUser.id === post.user_id) { %>
+        <a href="/post/<%= post.id %>/edit" class="edit-link">✏️ 编辑</a>
+        <form action="/post/<%= post.id %>/delete" method="POST" style="display:inline;" onsubmit="return confirm('确定删除吗？');">
+          <button type="submit" class="delete-link">🗑️ 删除</button>
+        </form>
+      <% } %>
+      <% if (currentUser && currentUser.id !== post.user_id) { %>
+        <a href="/messages/<%= post.user_id %>" class="chat-link">💬 私信</a>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- 评论区域 -->
+  <div class="comment-section-detail">
+    <h3>💬 评论 (<span id="commentCount"><%= commentCount || 0 %></span>)</h3>
+    
+    <% if (currentUser) { %>
+      <form action="/post/<%= post.id %>/comment" method="POST" class="comment-form-detail">
+        <input type="text" name="content" placeholder="写下你的评论..." required />
+        <button type="submit">发布评论</button>
+      </form>
+    <% } else { %>
+      <p class="login-prompt"><a href="/login">登录</a> 后可以评论</p>
+    <% } %>
+
+    <div class="comments-list-detail" id="commentsList">
+      <% comments.forEach(comment => { %>
+        <div class="comment-item-detail" id="comment-<%= comment.id %>">
+          <div class="comment-header">
+            <a href="/user/<%= comment.username %>" class="comment-author">
+              <% if (comment.avatar_filename) { %>
+                <img src="<%= comment.avatar_filename %>" alt="" class="comment-avatar" />
+              <% } else { %>
+                <span class="comment-avatar-placeholder"><%= comment.username.charAt(0).toUpperCase() %></span>
+              <% } %>
+              <span><%= comment.username %></span>
+            </a>
+            <span class="comment-time"><%= new Date(comment.created_at).toLocaleString() %></span>
+          </div>
+          <p class="comment-content"><%= comment.content %></p>
+          
+          <!-- 回复按钮 -->
+          <button class="reply-btn" onclick="toggleReplyForm(<%= comment.id %>, '<%= comment.username %>')">↩️ 回复</button>
+          
+          <!-- 回复表单 -->
+          <div class="reply-form-container" id="replyForm-<%= comment.id %>" style="display:none;">
+            <form action="/comment/<%= comment.id %>/reply" method="POST" class="reply-form">
+              <input type="text" name="content" placeholder="回复 @<%= comment.username %>..." required />
+              <input type="hidden" name="parent_comment_id" value="<%= comment.id %>" />
+              <button type="submit">回复</button>
+              <button type="button" onclick="toggleReplyForm(<%= comment.id %>)">取消</button>
+            </form>
+          </div>
+
+          <!-- 显示回复 -->
+          <% if (comment.replies && comment.replies.length > 0) { %>
+            <div class="replies-list">
+              <% comment.replies.forEach(reply => { %>
+                <div class="reply-item">
+                  <div class="comment-header">
+                    <a href="/user/<%= reply.username %>" class="comment-author">
+                      <% if (reply.avatar_filename) { %>
+                        <img src="<%= reply.avatar_filename %>" alt="" class="comment-avatar" />
+                      <% } else { %>
+                        <span class="comment-avatar-placeholder"><%= reply.username.charAt(0).toUpperCase() %></span>
+                      <% } %>
+                      <span><%= reply.username %></span>
+                    </a>
+                    <span class="comment-time"><%= new Date(reply.created_at).toLocaleString() %></span>
+                  </div>
+                  <p class="comment-content">@<%= reply.parent_username %> <%= reply.content %></p>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<style>
+.post-detail { max-width: 800px; margin: 0 auto; padding: 20px; }
+.post-detail-card { background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.post-detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.post-detail-author { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; }
+.detail-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.detail-avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent); color: white; font-weight: 700; font-size: 1.2rem; }
+.post-detail-date { font-size: 0.85rem; color: var(--muted); }
+.post-detail-title { font-size: 1.8rem; margin: 8px 0; }
+.post-detail-story { font-size: 1.05rem; line-height: 1.8; white-space: pre-wrap; }
+.detail-media { max-width: 100%; max-height: 500px; border-radius: 8px; margin: 16px 0; object-fit: cover; }
+.post-detail-actions { display: flex; gap: 16px; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px; }
+.chat-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+.comment-section-detail { margin-top: 24px; background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.comment-section-detail h3 { margin-top: 0; margin-bottom: 16px; }
+.comment-form-detail { display: flex; gap: 12px; margin-bottom: 20px; }
+.comment-form-detail input { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
+.comment-form-detail button { padding: 10px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.comment-form-detail button:hover { background: var(--accent-dark); }
+.login-prompt { color: var(--muted); }
+.comments-list-detail { margin-top: 16px; }
+.comment-item-detail { padding: 16px 0; border-bottom: 1px solid var(--border); }
+.comment-item-detail:last-child { border-bottom: none; }
+.comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.comment-author { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 0.95rem; }
+.comment-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+.comment-avatar-placeholder { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent); color: white; font-weight: 700; font-size: 0.8rem; }
+.comment-time { font-size: 0.75rem; color: var(--muted); }
+.comment-content { margin: 4px 0 8px; font-size: 0.95rem; }
+.reply-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.85rem; }
+.reply-btn:hover { text-decoration: underline; }
+.reply-form-container { margin-top: 8px; }
+.reply-form { display: flex; gap: 8px; }
+.reply-form input { flex: 1; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; }
+.reply-form button { padding: 6px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; }
+.reply-form button:hover { background: var(--accent-dark); }
+.replies-list { margin-left: 36px; padding-left: 16px; border-left: 2px solid var(--border); margin-top: 8px; }
+.reply-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.reply-item:last-child { border-bottom: none; }
+</style>
+
+<script>
+function toggleReplyForm(commentId, username) {
+  const form = document.getElementById('replyForm-' + commentId);
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    const input = form.querySelector('input[name="content"]');
+    if (username) input.placeholder = '回复 @' + username + '...';
+  } else {
+    form.style.display = 'none';
+  }
+}
+</script>
+
+<%- include('partials/footer') %>
