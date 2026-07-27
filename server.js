@@ -12,7 +12,6 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const db = require('./db');
 const config = require('./config');
 const { requireAuth, attachUser } = require('./middleware/auth');
-const pgSession = require('connect-pg-simple')(session);
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -37,15 +36,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.use(session({
-  store: new pgSession({
-    pool: db,
-    tableName: 'session',
-    createTableIfMissing: true
-  }),
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }
 }));
 
 app.use(attachUser(db));
@@ -571,6 +565,8 @@ app.post('/post/:id/delete', requireAuth, async (req, res) => {
     const post = result.rows[0];
     if (!post || post.user_id !== req.session.userId) return res.status(403).send('Not allowed');
     if (post.photo_filename) fs.unlink(path.join(UPLOAD_DIR, post.photo_filename), () => {});
+    await db.query('DELETE FROM likes WHERE post_id = $1', [post.id]);
+    await db.query('DELETE FROM comments WHERE post_id = $1', [post.id]);
     await db.query('DELETE FROM posts WHERE id = $1', [post.id]);
     res.redirect('back');
   } catch (e) {
